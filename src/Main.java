@@ -5,11 +5,9 @@ import primer.po.Items;
 import primer.po.PurchaseOrderType;
 import primer.po.USAddress;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -41,6 +39,40 @@ public class Main {
             // display the items
             Items items = po.getItems();
             displayItems( items );
+
+System.out.println("modify the billto address and write back...");
+            //demo marshal to output modify result
+            // change the billto address
+            USAddress billAddress = po.getBillTo();
+            billAddress.setName( "John Bob" );
+            billAddress.setStreet( "242 Main Street" );
+            billAddress.setCity( "Beverly Hills" );
+            billAddress.setState( "CA" );
+            billAddress.setZip( new BigDecimal( "90210" ) );
+
+            // create a Marshaller and marshal to a file
+            Marshaller m = jc.createMarshaller();
+            m.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
+            m.marshal(poElement, Files.newOutputStream(Paths.get("pobill2.xml")));
+            m.marshal( poElement, System.out );
+
+            //add one more item
+            Items.Item newItem = new primer.po.ObjectFactory().createItemsItem();
+            newItem.setProductName("Porche");
+            newItem.setPartNum("242-PO");
+            newItem.setQuantity(1);
+            newItem.setUSPrice(new BigDecimal("1120.09"));
+//            newItem.setShipDate(DatatypeFactory.newInstance().newXMLGregorianCalendar("2023-05-18T19:56:00+8:00"));
+            items.getItem().add(newItem);
+
+            System.out.println("add an new item...");
+
+            m.marshal(poElement, Files.newOutputStream(Paths.get("pobill2.xml")));
+            m.marshal( poElement, System.out );
+
+
+
+
 
         } catch(JAXBException | IOException je ) {
             je.printStackTrace();
